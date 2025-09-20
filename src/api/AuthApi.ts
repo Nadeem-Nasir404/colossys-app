@@ -1,24 +1,19 @@
-export const BASE_URL = "http://192.168.1.101:801"; // apna IP
+const BASE_URL = "http://192.168.1.101:801/api"; // ⚡ change to your backend
 
 export async function loginApi(userName: string, password: string) {
-  const res = await fetch(`${BASE_URL}/account/login`, {
+  const response = await fetch(`${BASE_URL}/account/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userName,
       password,
-      email: "abc@gmail.com", // ✅ hardcoded email
     }),
   });
 
-  const text = await res.text();
-  let data;
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    throw new Error("Invalid JSON response");
-  }
+  const text = await response.text();
+  console.log("🔑 Login API raw response:", text);
 
-  if (!res.ok) throw new Error(data?.message || "Login failed");
-  return data;
+  if (!response.ok) throw new Error(text || "Failed to login");
+
+  return JSON.parse(text);
 }

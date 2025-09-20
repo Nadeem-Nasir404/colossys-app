@@ -6,49 +6,67 @@ import {
 } from "@react-navigation/drawer";
 import { Redirect, Slot, usePathname } from "expo-router";
 import { Drawer } from "expo-router/drawer";
-
 import React, { useContext, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+// ✅ Custom Drawer with Header, User Info & Logout
 function CustomDrawerContent(props: any) {
   const { logout, user } = useContext(AuthContext);
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
-      {/* 👤 User Info Header */}
+      {/* 🔹 App Title */}
       <View
         style={{
-          padding: 20,
-          backgroundColor: "#FF4A2C",
-          flexDirection: "row",
+          paddingVertical: 25,
           alignItems: "center",
+          borderBottomWidth: 1,
+          borderColor: "#e0e0e0",
+          marginBottom: 15,
         }}
       >
-        <Image
-          source={require("../assets/logo.png")}
-          style={{ width: 50, height: 50, borderRadius: 25, marginRight: 10 }}
-        />
-        <View>
-          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+        <Text
+          style={{
+            fontSize: 35,
+            fontWeight: "bold",
+            color: "#FF4A2C",
+            letterSpacing: 1,
+          }}
+        >
+          COLOSSYS
+        </Text>
+      </View>
+
+      {/* 🔹 User Info */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 20,
+          paddingBottom: 20,
+          borderBottomWidth: 1,
+          borderColor: "#e0e0e0",
+          marginBottom: 35,
+        }}
+      >
+        {/* User Icon */}
+        <Ionicons name="person-circle-outline" size={40} color="#FF4A2C" />
+
+        {/* Name */}
+        <View style={{ marginLeft: 10 }}>
+          <Text style={{ color: "#000", fontSize: 13, fontWeight: "bold" }}>
             {user?.name || "User"}
-          </Text>
-          <Text style={{ color: "#fff", fontSize: 13 }}>
-            {user?.email || "abc@gmail.com"}
           </Text>
         </View>
       </View>
 
-      {/* Default drawer items */}
-      <DrawerItemList {...props} />
+      {/* Drawer Items */}
+      <View style={{ flex: 1, paddingHorizontal: 5 }}>
+        <DrawerItemList {...props} />
+      </View>
 
-      {/* 🚪 Logout Button */}
+      {/* 🚪 Logout */}
       <TouchableOpacity
         style={{
           marginTop: "auto",
@@ -67,13 +85,11 @@ function CustomDrawerContent(props: any) {
   );
 }
 
-// ✅ Guard: Protect Routes
+// ✅ Auth Guard
 function AuthGuard() {
   const { userToken, restoreSession } = useContext(AuthContext);
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
-
-  const publicRoutes = ["/login"];
 
   useEffect(() => {
     const init = async () => {
@@ -94,19 +110,17 @@ function AuthGuard() {
     );
   }
 
-  // ⛔ If no token → only allow login
-  if (!userToken && !publicRoutes.includes(pathname)) {
-    return <Redirect href="/login" />;
-  }
-
-  // ✅ If logged in but tries to access login → redirect home
-  if (userToken && publicRoutes.includes(pathname)) {
-    return <Redirect href="/" />;
-  }
-
-  // ✅ Show login screen without Drawer
-  if (pathname === "/login") {
+  // ⛔ No token → login only
+  if (!userToken) {
+    if (pathname !== "/login") {
+      return <Redirect href="/login" />;
+    }
     return <Slot />;
+  }
+
+  // ✅ Logged in but tries login → redirect home
+  if (userToken && pathname === "/login") {
+    return <Redirect href="/" />;
   }
 
   // ✅ Drawer after login
@@ -129,7 +143,7 @@ function AuthGuard() {
         }}
       />
       <Drawer.Screen
-        name="unitwise"
+        name="UnitWise"
         options={{
           title: "Unit Wise",
           drawerIcon: ({ color, size }) => (
@@ -138,11 +152,11 @@ function AuthGuard() {
         }}
       />
       <Drawer.Screen
-        name="settings"
+        name="Machines"
         options={{
-          title: "Settings",
+          title: "Machines",
           drawerIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
+            <Ionicons name="cog-outline" size={size} color={color} />
           ),
         }}
       />
@@ -160,4 +174,3 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
-``;

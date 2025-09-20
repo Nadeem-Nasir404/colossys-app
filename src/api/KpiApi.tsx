@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.1.101:801";
+const BASE_URL = "http://192.168.1.101:801/api";
 
 export type KpiItem = {
   kpi: string;

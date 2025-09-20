@@ -26,7 +26,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const restoreSession = useCallback(async () => {
     const token = await storage.getToken();
     console.log("🔑 Restored token:", token);
-    setUserToken(token ?? null);
+
+    if (token) {
+      setUserToken(token);
+    } else {
+      setUserToken(null); // ⚡ Fix: Ensure null if no token
+    }
   }, []);
 
   const login = useCallback(async (token: string, u?: any) => {

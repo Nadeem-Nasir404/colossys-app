@@ -106,17 +106,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: "90%",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)", // transparent white box
+    backgroundColor: "rgba(255, 255, 255, 0.07)", // transparent white box
   },
   logo: { width: 300, height: 300, marginBottom: 20 },
   input: {
     borderWidth: 1,
-    borderColor: "#b8b8b8",
+    borderColor: "#b8b8b8b7",
     width: "100%",
-    padding: 13,
+    padding: 15,
     marginBottom: 20,
     borderRadius: 12,
-    backgroundColor: "#f9f9f998",
+    backgroundColor: "#f9f9f950",
     fontSize: 18,
   },
   button: {

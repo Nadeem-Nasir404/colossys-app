@@ -1,4 +1,4 @@
-import KpiTable from "./components/KpiTable";
+import KpiTable from "@/src/components/KpiTable";
 
 import getKpiData from "@/src/api/KpiApi";
 import { AuthContext } from "@/src/contexts/AuthContexts";
@@ -69,7 +69,6 @@ export default function Index() {
           ) : (
             <Text>No KPI data found</Text>
           )}
-          {/* <Button title="Logout" onPress={logout} /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,13 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const TOKEN_KEY = "authToken";
+const TOKEN_KEY = "userToken";
 
 export async function saveToken(token: string) {
   await AsyncStorage.setItem(TOKEN_KEY, token);
 }
 
 export async function getToken() {
-  return (await AsyncStorage.getItem(TOKEN_KEY)) ?? null;
+  return await AsyncStorage.getItem(TOKEN_KEY);
 }
 
 export async function removeToken() {
