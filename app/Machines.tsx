@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 const Machines = () => {
   return (
     <View>
-      <Text>Machines</Text>
+      <Text>Macvcdcwdcudcuwdchduchdwchchwdc chcuwehcwe hchchines</Text>
     </View>
   );
 };

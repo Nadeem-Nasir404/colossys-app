@@ -7,16 +7,37 @@ import {
 import { Redirect, Slot, usePathname } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import React, { useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Text as RNText,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-// ✅ Custom Drawer with Header, User Info & Logout
+// ✅ Fonts
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_700Bold,
+  useFonts,
+} from "@expo-google-fonts/poppins";
+
+// ✅ Our CustomText wrapper
+import CustomText from "@/src/components/CustomText";
+
+// 🔹 Patch RNText globally to always use CustomText
+(RNText as any).render = (props: any, ref: any) => {
+  return <CustomText {...props} ref={ref} />;
+};
+
+// ---------------- Drawer Content ----------------
 function CustomDrawerContent(props: any) {
   const { logout, user } = useContext(AuthContext);
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
-      {/* 🔹 App Title */}
+      {/* Title */}
       <View
         style={{
           paddingVertical: 25,
@@ -26,19 +47,19 @@ function CustomDrawerContent(props: any) {
           marginBottom: 15,
         }}
       >
-        <Text
+        <CustomText
           style={{
             fontSize: 35,
-            fontWeight: "bold",
             color: "#FF4A2C",
             letterSpacing: 1,
+            fontFamily: "Poppins_700Bold",
           }}
         >
           COLOSSYS
-        </Text>
+        </CustomText>
       </View>
 
-      {/* 🔹 User Info */}
+      {/* User */}
       <View
         style={{
           flexDirection: "row",
@@ -50,14 +71,11 @@ function CustomDrawerContent(props: any) {
           marginBottom: 35,
         }}
       >
-        {/* User Icon */}
         <Ionicons name="person-circle-outline" size={40} color="#FF4A2C" />
-
-        {/* Name */}
         <View style={{ marginLeft: 10 }}>
-          <Text style={{ color: "#000", fontSize: 13, fontWeight: "bold" }}>
+          <CustomText style={{ fontSize: 13, fontFamily: "Poppins_500Medium" }}>
             {user?.name || "User"}
-          </Text>
+          </CustomText>
         </View>
       </View>
 
@@ -66,7 +84,7 @@ function CustomDrawerContent(props: any) {
         <DrawerItemList {...props} />
       </View>
 
-      {/* 🚪 Logout */}
+      {/* Logout */}
       <TouchableOpacity
         style={{
           marginTop: "auto",
@@ -77,15 +95,15 @@ function CustomDrawerContent(props: any) {
         onPress={logout}
       >
         <Ionicons name="log-out-outline" size={22} color="red" />
-        <Text style={{ marginLeft: 10, fontSize: 16, color: "red" }}>
+        <CustomText style={{ marginLeft: 10, fontSize: 16, color: "red" }}>
           Logout
-        </Text>
+        </CustomText>
       </TouchableOpacity>
     </DrawerContentScrollView>
   );
 }
 
-// ✅ Auth Guard
+// ---------------- Auth Guard ----------------
 function AuthGuard() {
   const { userToken, restoreSession } = useContext(AuthContext);
   const pathname = usePathname();
@@ -93,7 +111,6 @@ function AuthGuard() {
 
   useEffect(() => {
     const init = async () => {
-      console.log("🔄 Restoring session...");
       await restoreSession();
       setLoading(false);
     };
@@ -110,20 +127,13 @@ function AuthGuard() {
     );
   }
 
-  // ⛔ No token → login only
   if (!userToken) {
-    if (pathname !== "/login") {
-      return <Redirect href="/login" />;
-    }
+    if (pathname !== "/login") return <Redirect href="/login" />;
     return <Slot />;
   }
 
-  // ✅ Logged in but tries login → redirect home
-  if (userToken && pathname === "/login") {
-    return <Redirect href="/" />;
-  }
+  if (userToken && pathname === "/login") return <Redirect href="/" />;
 
-  // ✅ Drawer after login
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -131,6 +141,8 @@ function AuthGuard() {
         headerStyle: { backgroundColor: "#FF4A2C" },
         headerTintColor: "#fff",
         drawerActiveTintColor: "#FF4A2C",
+        drawerLabelStyle: { fontFamily: "Poppins_500Medium", fontSize: 14 },
+        headerTitleStyle: { fontFamily: "Poppins_700Bold", fontSize: 18 },
       }}
     >
       <Drawer.Screen
@@ -164,8 +176,24 @@ function AuthGuard() {
   );
 }
 
-// ✅ Root Layout
+// ---------------- Root Layout ----------------
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_500Medium,
+    Poppins_700Bold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+      >
+        <ActivityIndicator size="large" color="#FF4A2C" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
