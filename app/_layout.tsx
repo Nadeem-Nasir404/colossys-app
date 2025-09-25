@@ -138,7 +138,7 @@ function AuthGuard() {
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        headerStyle: { backgroundColor: "#FF4A2C" },
+        headerStyle: { backgroundColor: "#512626ff" },
         headerTintColor: "#fff",
         drawerActiveTintColor: "#FF4A2C",
         drawerLabelStyle: { fontFamily: "Poppins_500Medium", fontSize: 14 },

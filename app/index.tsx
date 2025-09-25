@@ -5,14 +5,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import getKpiData from "@/src/api/KpiApi";
 import { getTotalMachineGraph } from "@/src/api/TotalMachineApi";
 import { getUnitMachineGraph } from "@/src/api/UnitMachineApi";
-import { getUnitWiseGraph } from "@/src/api/UnitWiseApi"; // 👈 new (table)
+import { getUnitWiseGraph } from "@/src/api/UnitWiseApi";
 
 import DashboardCard from "@/src/components/DashboardCard";
 import DashboardWrapper from "@/src/components/DashboardWrapper";
 import KpiTable from "@/src/components/KpiTable";
 import MachineStatusPie from "@/src/components/MachineStatusPie";
 import UnitMachineChart from "@/src/components/UnitMachineChart";
-import UnitWiseTable from "@/src/components/UnitWiseTable"; // 👈 new (table)
+import UnitWiseGraph from "@/src/components/UnitWiseGraph";
+import UnitWiseTable from "@/src/components/UnitWiseTable";
 
 import { AuthContext } from "@/src/contexts/AuthContexts";
 
@@ -22,7 +23,7 @@ export default function Index() {
   const [machineData, setMachineData] = useState<any>(null);
   const [kpiData, setKpiData] = useState<any>(null);
   const [unitData, setUnitData] = useState<any>(null);
-  const [unitWiseData, setUnitWiseData] = useState<any[]>([]); // 👈 table
+  const [unitWiseData, setUnitWiseData] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +87,15 @@ export default function Index() {
           <MachineStatusPie data={machineData} />
         ) : (
           <Text>No machine data found</Text>
+        )}
+      </DashboardCard>
+
+      {/* Unit Wise Graph (Gifted Charts) */}
+      <DashboardCard title="📊 Unit Wise Graph">
+        {unitWiseData.length > 0 ? (
+          <UnitWiseGraph data={unitWiseData} />
+        ) : (
+          <Text>No graph data found</Text>
         )}
       </DashboardCard>
 

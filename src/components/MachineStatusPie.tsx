@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import { PieChart } from "react-native-gifted-charts";
 
 const { width } = Dimensions.get("window");
@@ -27,68 +27,92 @@ export default function MachineStatusPie({ data }: MachineStatusProps) {
   const chartData = [
     {
       value: running,
-      color: activeIndex === 0 ? "#2E7D32" : "#4CAF50",
+      color: activeIndex === 0 ? "#11574F" : "#107a57ff",
       focused: activeIndex === 0,
-      onPress: () => setActiveIndex(0), // ✅ tap handler
+      onPress: () => setActiveIndex(0),
     },
     {
       value: stopped,
       color: activeIndex === 1 ? "#B71C1C" : "#F44336",
       focused: activeIndex === 1,
-      onPress: () => setActiveIndex(1), // ✅ tap handler
+      onPress: () => setActiveIndex(1),
     },
   ];
 
+  const getCenterLabel = () => {
+    if (activeIndex === 0) {
+      return (
+        <>
+          <Text style={[styles.centerNumber, { color: "#2E7D32" }]}>
+            {running}
+          </Text>
+          <Text style={styles.centerLabel}>Running</Text>
+        </>
+      );
+    }
+    if (activeIndex === 1) {
+      return (
+        <>
+          <Text style={[styles.centerNumber, { color: "#B71C1C" }]}>
+            {stopped}
+          </Text>
+          <Text style={styles.centerLabel}>Stopped</Text>
+        </>
+      );
+    }
+    return (
+      <>
+        <Text style={styles.centerNumber}>{total}</Text>
+        <Text style={styles.centerLabel}>Total</Text>
+      </>
+    );
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>⚙️ Total Machine Status</Text>
+    // 👇 Pressable to detect taps outside the slices
+    <Pressable style={{ flex: 1 }} onPress={() => setActiveIndex(null)}>
+      <View style={styles.container}>
+        <Text style={styles.title}>⚙️ Total Machine Status</Text>
 
-      <PieChart
-        data={chartData}
-        donut
-        radius={baseRadius}
-        innerRadius={65}
-        showText={false}
-        isAnimated
-        animationDuration={500}
-        focusOnPress
-        centerLabelComponent={() => (
-          <View style={styles.centerBox}>
-            <Text style={styles.centerNumber}>{total}</Text>
-            <Text style={styles.centerLabel}>Total</Text>
+        <PieChart
+          data={chartData}
+          donut
+          radius={baseRadius}
+          innerRadius={65}
+          showText={false}
+          isAnimated
+          animationDuration={500}
+          focusOnPress
+          centerLabelComponent={() => (
+            <View style={styles.centerBox}>{getCenterLabel()}</View>
+          )}
+        />
+
+        {/* Legend */}
+        <View style={styles.legend}>
+          <View style={styles.legendRow}>
+            <View style={[styles.dot, { backgroundColor: "#11574F" }]} />
+            <Text style={styles.legendText}>
+              Running — {running} ({runningPercent}%)
+            </Text>
           </View>
-        )}
-      />
-
-      {/* Legend */}
-      <View style={styles.legend}>
-        <View style={styles.legendRow}>
-          <View style={[styles.dot, { backgroundColor: "#4CAF50" }]} />
-          <Text style={styles.legendText}>
-            Running — {running} ({runningPercent}%)
-          </Text>
-        </View>
-        <View style={styles.legendRow}>
-          <View style={[styles.dot, { backgroundColor: "#F44336" }]} />
-          <Text style={styles.legendText}>
-            Stopped — {stopped} ({stoppedPercent}%)
-          </Text>
+          <View style={styles.legendRow}>
+            <View style={[styles.dot, { backgroundColor: "#F44336" }]} />
+            <Text style={styles.legendText}>
+              Stopped — {stopped} ({stoppedPercent}%)
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   container: { alignItems: "center", marginVertical: 20 },
-  title: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 20,
-    color: "#333",
-  },
+  title: { fontSize: 17, fontWeight: "700", marginBottom: 20, color: "#333" },
   centerBox: { alignItems: "center", justifyContent: "center" },
-  centerNumber: { fontSize: 24, fontWeight: "bold", color: "#333" },
+  centerNumber: { fontSize: 20, fontWeight: "bold", color: "#333" },
   centerLabel: { fontSize: 14, color: "#666" },
   legend: { marginTop: 20 },
   legendRow: { flexDirection: "row", alignItems: "center", marginVertical: 5 },
