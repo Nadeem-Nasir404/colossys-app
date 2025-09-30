@@ -1,5 +1,6 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import CustomText from "../components/CustomText"; // ⬅️ adjust path if needed
 
 interface WrapperProps {
   title?: string;
@@ -8,8 +9,8 @@ interface WrapperProps {
 
 export default function DashboardWrapper({ title, children }: WrapperProps) {
   return (
-    <ScrollView style={styles.container}>
-      {title && <Text style={styles.title}>{title}</Text>}
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {title && <CustomText style={styles.title}>{title}</CustomText>}
       <View style={styles.content}>{children}</View>
     </ScrollView>
   );
@@ -18,17 +19,20 @@ export default function DashboardWrapper({ title, children }: WrapperProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
-    padding: 15,
+    backgroundColor: "#FFFFFF", // clean light mode
+    paddingHorizontal: 16,
+    paddingTop: 12,
   },
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#333",
-    marginBottom: 15,
+    color: "#FF4A2C", // brand orange for titles
+    marginBottom: 18,
+    fontFamily: "Poppins_600SemiBold", // ✅ ensures Poppins
   },
   content: {
     flex: 1,
-    gap: 15,
+    gap: 18,
+    paddingBottom: 30, // safe bottom space
   },
 });

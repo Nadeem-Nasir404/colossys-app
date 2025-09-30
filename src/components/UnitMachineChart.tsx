@@ -119,7 +119,7 @@ export default function UnitMachineChart({ data }: { data: UnitData[] }) {
               style={{
                 width: 14,
                 height: 14,
-                backgroundColor: "#528B84",
+                backgroundColor: "#11574F",
                 marginRight: 6,
                 borderRadius: 3,
               }}

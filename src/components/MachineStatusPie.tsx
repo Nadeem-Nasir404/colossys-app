@@ -33,7 +33,7 @@ export default function MachineStatusPie({ data }: MachineStatusProps) {
     },
     {
       value: stopped,
-      color: activeIndex === 1 ? "#B71C1C" : "#F44336",
+      color: activeIndex === 1 ? "#000000" : "#891616ff",
       focused: activeIndex === 1,
       onPress: () => setActiveIndex(1),
     },

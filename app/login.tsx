@@ -14,10 +14,9 @@ import {
   View,
 } from "react-native";
 
-// Define the expected structure of login API response
 interface LoginResponse {
   token: string;
-  [key: string]: any; // for any additional data returned
+  [key: string]: any;
 }
 
 export default function Login(): JSX.Element {
@@ -27,6 +26,7 @@ export default function Login(): JSX.Element {
   const [userName, setUserName] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
 
   const handleLogin = async (): Promise<void> => {
     if (!userName || !password) {
@@ -71,7 +71,12 @@ export default function Login(): JSX.Element {
           placeholder="Username"
           value={userName}
           onChangeText={setUserName}
-          style={styles.input}
+          style={[
+            styles.input,
+            focusedInput === "username" && styles.inputFocused,
+          ]}
+          onFocus={() => setFocusedInput("username")}
+          onBlur={() => setFocusedInput(null)}
           autoCapitalize="none"
         />
 
@@ -80,12 +85,18 @@ export default function Login(): JSX.Element {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
-          style={styles.input}
+          style={[
+            styles.input,
+            focusedInput === "password" && styles.inputFocused,
+          ]}
+          onFocus={() => setFocusedInput("password")}
+          onBlur={() => setFocusedInput(null)}
         />
 
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, loading && { opacity: 0.7 }]}
           onPress={handleLogin}
+          activeOpacity={0.8}
           disabled={loading}
         >
           {loading ? (
@@ -106,9 +117,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: "90%",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.07)", // transparent white box
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
   },
-  logo: { width: 300, height: 300, marginBottom: 20 },
+  logo: { width: 270, height: 250, marginBottom: 20 },
   input: {
     borderWidth: 1,
     borderColor: "#b8b8b8b7",
@@ -117,15 +128,23 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 12,
     backgroundColor: "#f9f9f950",
-    fontSize: 18,
+    fontSize: 16,
+  },
+  inputFocused: {
+    borderColor: "#FF4A2C",
   },
   button: {
     backgroundColor: "#FF4A2C",
-    padding: 18,
-    borderRadius: 15,
+    padding: 16,
+    borderRadius: 18,
     width: "100%",
     alignItems: "center",
     marginTop: 10,
+    shadowColor: "#FF4A2C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   buttonText: { color: "#fff", fontWeight: "700", fontSize: 18 },
 });

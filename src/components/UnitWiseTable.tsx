@@ -15,10 +15,7 @@ interface UnitWiseTableProps {
 const UnitWiseTable: React.FC<UnitWiseTableProps> = ({ data }) => {
   const renderItem = ({ item, index }: { item: UnitData; index: number }) => (
     <View
-      style={[
-        styles.row,
-        index % 2 === 0 ? styles.rowEven : styles.rowOdd, // zebra rows
-      ]}
+      style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
     >
       <Text style={styles.cell}>{item.unit.trim()}</Text>
       <Text style={styles.cell}>
@@ -60,7 +57,6 @@ const styles = StyleSheet.create({
   table: {
     borderRadius: 8,
     overflow: "hidden",
-    marginBottom: 50,
   },
   row: {
     flexDirection: "row",
@@ -70,7 +66,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#512626ff",
+    backgroundColor: "#FF6B35", // brand orange header
   },
   headerText: {
     flex: 1,
@@ -79,13 +75,13 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-  rowEven: { backgroundColor: "#fafafa" },
-  rowOdd: { backgroundColor: "#fff" },
+  rowEven: { backgroundColor: "#fdfdfd" }, // light zebra for card
+  rowOdd: { backgroundColor: "#f7f7f7" },
   cell: {
     flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: "#222",
     textAlign: "center",
   },
   emptyText: {

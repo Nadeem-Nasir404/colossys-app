@@ -9,10 +9,7 @@ interface KpiTableProps {
 const KpiTable: React.FC<KpiTableProps> = ({ data }) => {
   const renderItem = ({ item, index }: { item: KpiItem; index: number }) => (
     <View
-      style={[
-        styles.row,
-        index % 2 === 0 ? styles.rowEven : styles.rowOdd, // zebra rows
-      ]}
+      style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
     >
       <Text style={styles.cellKey}>{item.kpi}</Text>
       <Text style={styles.cellValue}>{item.value}</Text>
@@ -53,7 +50,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#512626ff",
+    backgroundColor: "#FF6B35", // brand orange for header
   },
   headerText: {
     flex: 1,
@@ -62,20 +59,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-  rowEven: { backgroundColor: "#fafafa" },
-  rowOdd: { backgroundColor: "#fff" },
+  rowEven: { backgroundColor: "#fdfdfd" }, // softer to blend with card bg
+  rowOdd: { backgroundColor: "#f7f7f7" },
   cellKey: {
     flex: 1,
     fontSize: 14,
     fontWeight: "600",
-    color: "#333",
+    color: "#222",
     textAlign: "center",
   },
   cellValue: {
     flex: 1,
     fontSize: 14,
-    color: "#444",
+    color: "#333",
     textAlign: "center",
+    fontWeight: "500",
   },
   emptyText: {
     padding: 12,

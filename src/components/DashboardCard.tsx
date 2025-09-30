@@ -1,5 +1,6 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import CustomText from "../components/CustomText"; // ⬅️ adjust path if needed
 
 interface CardProps {
   title?: string;
@@ -9,7 +10,7 @@ interface CardProps {
 export default function DashboardCard({ title, children }: CardProps) {
   return (
     <View style={styles.card}>
-      {title && <Text style={styles.cardTitle}>{title}</Text>}
+      {title && <CustomText style={styles.cardTitle}>{title}</CustomText>}
       <View>{children}</View>
     </View>
   );
@@ -17,11 +18,12 @@ export default function DashboardCard({ title, children }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f4f4f4ff",
+
     borderRadius: 8,
     padding: 7,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
+    shadowOpacity: 0,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 4,
@@ -29,7 +31,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 17,
-    fontWeight: "600",
+    fontWeight: "800",
     color: "#222",
     marginBottom: 10,
     textAlign: "center",

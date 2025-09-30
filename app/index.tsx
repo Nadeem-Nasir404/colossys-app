@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import getKpiData from "@/src/api/KpiApi";
@@ -15,6 +15,7 @@ import UnitMachineChart from "@/src/components/UnitMachineChart";
 import UnitWiseGraph from "@/src/components/UnitWiseGraph";
 import UnitWiseTable from "@/src/components/UnitWiseTable";
 
+import CustomText from "@/src/components/CustomText";
 import { AuthContext } from "@/src/contexts/AuthContexts";
 
 export default function Index() {
@@ -74,7 +75,9 @@ export default function Index() {
       <SafeAreaView
         style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
       >
-        <Text>{error}</Text>
+        <CustomText style={{ fontWeight: "500", color: "red" }}>
+          {error}
+        </CustomText>
       </SafeAreaView>
     );
   }
@@ -86,7 +89,7 @@ export default function Index() {
         {machineData ? (
           <MachineStatusPie data={machineData} />
         ) : (
-          <Text>No machine data found</Text>
+          <CustomText>No machine data found</CustomText>
         )}
       </DashboardCard>
 
@@ -95,7 +98,7 @@ export default function Index() {
         {unitWiseData.length > 0 ? (
           <UnitWiseGraph data={unitWiseData} />
         ) : (
-          <Text>No graph data found</Text>
+          <CustomText>No graph data found</CustomText>
         )}
       </DashboardCard>
 
@@ -104,13 +107,17 @@ export default function Index() {
         {unitData && unitData.length > 0 ? (
           <UnitMachineChart data={unitData} />
         ) : (
-          <Text>No unit data found</Text>
+          <CustomText>No unit data found</CustomText>
         )}
       </DashboardCard>
 
       {/* KPI Overview */}
       <DashboardCard title="📈 KPI Overview">
-        {kpiData ? <KpiTable data={kpiData} /> : <Text>No KPI data found</Text>}
+        {kpiData ? (
+          <KpiTable data={kpiData} />
+        ) : (
+          <CustomText>No KPI data found</CustomText>
+        )}
       </DashboardCard>
 
       {/* Unit Wise Table */}
@@ -118,7 +125,7 @@ export default function Index() {
         {unitWiseData.length > 0 ? (
           <UnitWiseTable data={unitWiseData} />
         ) : (
-          <Text>No unit wise table data found</Text>
+          <CustomText>No unit wise table data found</CustomText>
         )}
       </DashboardCard>
     </DashboardWrapper>
