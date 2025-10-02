@@ -156,7 +156,7 @@ function AuthGuard() {
           title: "Dashboard",
           headerBackground: () => (
             <LinearGradient
-              colors={["#FF6A3D", "#FF4A2C"]}
+              colors={["#343A40", "#000000ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}
@@ -170,7 +170,7 @@ function AuthGuard() {
           title: "Unit Wise",
           headerBackground: () => (
             <LinearGradient
-              colors={["#FF6A3D", "#FF4A2C"]}
+              colors={["#FF6A3D", "#a03826ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}
@@ -184,7 +184,7 @@ function AuthGuard() {
           title: "Machines",
           headerBackground: () => (
             <LinearGradient
-              colors={["#FF6A3D", "#FF4A2C"]}
+              colors={["#FF6A3D", "#a03826ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
   },
   logoText: {
-    fontSize: 35,
+    fontSize: 39,
     color: "#FF4A2C",
     letterSpacing: 1,
     marginTop: 35,

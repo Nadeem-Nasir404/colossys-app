@@ -18,7 +18,7 @@ export default function DashboardCard({ title, children }: CardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f4f4f4ff",
+    backgroundColor: "#d5d4d4ff",
 
     borderRadius: 8,
     padding: 7,

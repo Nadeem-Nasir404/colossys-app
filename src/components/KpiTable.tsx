@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#FF6B35", // brand orange for header
+    backgroundColor: "#343A40", // brand orange for header
   },
   headerText: {
     flex: 1,

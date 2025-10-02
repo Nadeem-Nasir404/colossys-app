@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
-import { getUnitWiseGraphApi } from "../api/UnitWiseGraphApi";
+import { getUnitWiseGraph } from "../api/UnitWiseApi";
 import { AuthContext } from "../contexts/AuthContexts";
 
 export default function UnitWiseGraph() {
@@ -25,7 +25,7 @@ export default function UnitWiseGraph() {
       }
 
       try {
-        const data = await getUnitWiseGraphApi(userToken);
+        const data = await getUnitWiseGraph(userToken);
 
         // Format: har unit ke 3 bars
         const formatted: any[] = [];

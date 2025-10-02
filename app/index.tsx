@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import getKpiData from "@/src/api/KpiApi";
 import { getTotalMachineGraph } from "@/src/api/TotalMachineApi";
-import { getUnitMachineGraph } from "@/src/api/UnitMachineApi";
+import { getUnitMachineGraph } from "@/src/api/UnitMachineStatusApi";
 import { getUnitWiseGraph } from "@/src/api/UnitWiseApi";
 
 import DashboardCard from "@/src/components/DashboardCard";
@@ -119,6 +119,7 @@ export default function Index() {
           <CustomText>No KPI data found</CustomText>
         )}
       </DashboardCard>
+
 
       {/* Unit Wise Table */}
       <DashboardCard title="📋 Unit Wise Table">

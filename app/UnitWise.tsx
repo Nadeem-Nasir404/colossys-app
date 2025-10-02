@@ -1,19 +1,22 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { BarChart } from "react-native-gifted-charts";
-
+import { getStoppedMachines } from "@/src/api/StoppedMachinesApi"; // 👈 import stopped API
 import { getUnitWiseGraph } from "@/src/api/UnitWiseApi";
 import { getUnitWiseMachines } from "@/src/api/UnitWiseMachineApi";
 import CustomText from "@/src/components/CustomText";
 import DashboardCard from "@/src/components/DashboardCard";
 import DashboardWrapper from "@/src/components/DashboardWrapper";
+import StoppedMachinesTable from "@/src/components/StoppedMachinesTable"; // 👈 import stopped table
 import { AuthContext } from "@/src/contexts/AuthContexts";
+import { Picker } from "@react-native-picker/picker";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import { BarChart } from "react-native-gifted-charts";
 
 const { width } = Dimensions.get("window");
 
@@ -24,13 +27,20 @@ export default function UnitWise() {
   const [selectedUnit, setSelectedUnit] = useState<string | null>(null);
   const [machines, setMachines] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [tooltipData, setTooltipData] = useState<any>(null);
+
+  const [page, setPage] = useState(0); // current page index
+  const [pageSize, setPageSize] = useState(6); // default per-page
+
+  // 🔹 stopped machines
+  const [stoppedMachines, setStoppedMachines] = useState<any[]>([]);
+  const [loadingStopped, setLoadingStopped] = useState(false);
 
   // 🔹 Load all unit summary
   useEffect(() => {
     const fetchUnits = async () => {
       try {
         const res = await getUnitWiseGraph(userToken!);
-        console.log("📊 UnitWiseGraph API raw response:", res);
         setUnits(res);
         if (res.length > 0) setSelectedUnit(res[0].unit.trim());
       } catch (err) {
@@ -47,8 +57,8 @@ export default function UnitWise() {
       setLoading(true);
       try {
         const res = await getUnitWiseMachines(userToken!, selectedUnit);
-        console.log("📡 Fetching machines for:", selectedUnit, res);
         setMachines(res);
+        setPage(0); // reset to first page when unit changes
       } catch (err) {
         console.error("❌ Error fetching unit wise machines:", err);
       } finally {
@@ -58,29 +68,93 @@ export default function UnitWise() {
     fetchMachines();
   }, [selectedUnit]);
 
-  // 🔹 Prepare chart data
-  const chartData = machines.map((mch: any) => ({
-    label: `M${mch.machineNo}`,
-    stacks: [
-      { value: mch.workingEff || 0, color: "#1976D2" }, // Blue
-      { value: mch.prdEff || 0, color: "#6A1B9A" }, // Purple
-      { value: mch.avgSpeed || 0, color: "#D32F2F" }, // Red
-    ],
-    machine: mch.machineNo,
-    working: mch.workingEff,
-    product: mch.prdEff,
-    speed: mch.avgSpeed,
-  }));
+  // 🔹 Load stopped machines for selected unit
+  useEffect(() => {
+    if (!selectedUnit) return;
+    const fetchStopped = async () => {
+      setLoadingStopped(true);
+      try {
+        const res = await getStoppedMachines(userToken!, selectedUnit);
+        setStoppedMachines(res);
+      } catch (err) {
+        console.error("❌ Error fetching stopped machines:", err);
+      } finally {
+        setLoadingStopped(false);
+      }
+    };
+    fetchStopped();
+  }, [selectedUnit]);
+
+  // 🔹 Pagination logic
+  const startIndex = page * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentMachines = machines.slice(startIndex, endIndex);
+
+  // 🔹 Prepare grouped chart data
+  const chartData: any[] = [];
+  currentMachines.forEach((mch: any) => {
+    const working = mch.workingEff || 0;
+    const product = mch.prdEff || 0;
+    const speed = mch.avgSpeed || 0;
+
+    chartData.push(
+      {
+        value: working,
+        label: `M${mch.machineNo}`,
+        frontColor: "#276FA9",
+        spacing: 6,
+        onPress: (x: number, y: number) =>
+          setTooltipData({
+            machine: mch.machineNo,
+            metric: "Working Eff%",
+            value: working.toFixed(1),
+            color: "#276FA9",
+            x,
+            y,
+          }),
+      },
+      {
+        value: product,
+        label: "",
+        frontColor: "#754961",
+        spacing: 6,
+        onPress: (x: number, y: number) =>
+          setTooltipData({
+            machine: mch.machineNo,
+            metric: "Product Eff%",
+            value: product.toFixed(1),
+            color: "#754961",
+            x,
+            y,
+          }),
+      },
+      {
+        value: speed,
+        label: "",
+        frontColor: "#FF2F4F",
+        spacing: 18,
+        onPress: (x: number, y: number) =>
+          setTooltipData({
+            machine: mch.machineNo,
+            metric: "Avg Speed",
+            value: speed.toFixed(1),
+            color: "#FF2F4F",
+            x,
+            y,
+          }),
+      }
+    );
+  });
 
   return (
     <DashboardWrapper>
-      {/* 🔹 Unit Selector Buttons */}
+      {/* 🔹 Unit Selector */}
       <DashboardCard title="🏭 Select Unit">
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {units.map((u, idx) => {
             const unitName = u.unit.trim();
             return (
-              <TouchableOpacity
+              <Pressable
                 key={idx}
                 onPress={() => setSelectedUnit(unitName)}
                 style={{
@@ -101,59 +175,178 @@ export default function UnitWise() {
                 >
                   {unitName}
                 </CustomText>
-              </TouchableOpacity>
+              </Pressable>
             );
           })}
         </ScrollView>
       </DashboardCard>
 
-      {/* 🔹 Chart */}
-      <DashboardCard title={`📊 Machine Status - ${selectedUnit || ""}`}>
+      {/* 🔹 Chart with pagination */}
+      <DashboardCard title={`📊 Machine Data - ${selectedUnit || ""}`}>
         {loading ? (
           <ActivityIndicator size="large" color="#FF4A2C" />
-        ) : machines.length > 0 ? (
-          <BarChart
-            width={width * 0.95}
-            height={260}
-            barWidth={18} // smaller bars
-            barBorderRadius={6}
-            stackData={chartData}
-            noOfSections={6}
-            spacing={18}
-            xAxisThickness={1}
-            yAxisThickness={1}
-            xAxisLabelTextStyle={{ fontSize: 11 }}
-            yAxisTextStyle={{ fontSize: 11 }}
-            showValuesAsTopLabel={false}
-            isAnimated
-            animationDuration={600}
-            renderTooltip={(item: any) => (
+        ) : currentMachines.length > 0 ? (
+          <Pressable style={{ flex: 1 }} onPress={() => setTooltipData(null)}>
+            <View style={{ padding: 10 }}>
+              <BarChart
+                data={chartData}
+                width={width * 0.95}
+                height={250}
+                barWidth={14}
+                barBorderRadius={4}
+                noOfSections={6}
+                yAxisThickness={1}
+                xAxisThickness={1}
+                isAnimated
+                animationDuration={700}
+                xAxisLabelTextStyle={{ fontSize: 10 }}
+                yAxisTextStyle={{ fontSize: 10 }}
+              />
+
+              {/* Tooltip */}
+              {tooltipData && (
+                <View
+                  style={{
+                    position: "absolute",
+                    left: tooltipData.x - 50,
+                    top: tooltipData.y - 70,
+                    backgroundColor: "#fff",
+                    padding: 8,
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    zIndex: 10,
+                    width: 140,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: tooltipData.color,
+                      fontWeight: "700",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                  >
+                    Machine {tooltipData.machine}
+                  </Text>
+                  <Text
+                    style={{
+                      color: tooltipData.color,
+                      fontWeight: "600",
+                      fontSize: 12,
+                      textAlign: "center",
+                    }}
+                  >
+                    {tooltipData.metric}: {tooltipData.value}
+                  </Text>
+                </View>
+              )}
+
+              {/* Legend */}
               <View
                 style={{
-                  backgroundColor: "#333",
-                  padding: 6,
-                  borderRadius: 6,
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  marginTop: 20,
                 }}
               >
-                <CustomText style={{ color: "#fff", fontSize: 12 }}>
-                  M{item.machine}
-                </CustomText>
-                <CustomText style={{ color: "#90CAF9", fontSize: 11 }}>
-                  Working: {item.working?.toFixed(1) || "0"}%
-                </CustomText>
-                <CustomText style={{ color: "#CE93D8", fontSize: 11 }}>
-                  Product: {item.product?.toFixed(1) || "0"}%
-                </CustomText>
-                <CustomText style={{ color: "#EF9A9A", fontSize: 11 }}>
-                  Speed: {item.speed?.toFixed(1) || "0"}
-                </CustomText>
+                {[
+                  { color: "#276FA9", label: "Working Eff%" },
+                  { color: "#754961", label: "Product Eff%" },
+                  { color: "#FF2F4F", label: "Avg Speed" },
+                ].map((item, idx) => (
+                  <View
+                    key={idx}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginHorizontal: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 14,
+                        height: 14,
+                        backgroundColor: item.color,
+                        marginRight: 6,
+                        borderRadius: 3,
+                      }}
+                    />
+                    <Text style={{ fontSize: 12 }}>{item.label}</Text>
+                  </View>
+                ))}
               </View>
-            )}
-          />
+
+              {/* Pagination Controls */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  marginTop: 20,
+                  alignItems: "center",
+                }}
+              >
+                {/* Machines per page */}
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    width: 150,
+                  }}
+                >
+                  <Picker
+                    selectedValue={pageSize}
+                    onValueChange={(val) => {
+                      setPageSize(val);
+                      setPage(0);
+                    }}
+                  >
+                    {[1, 5, 8, 20, 50, 100].map((size) => (
+                      <Picker.Item
+                        key={size}
+                        label={`${size} per page`}
+                        value={size}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+
+                {/* Page dropdown */}
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    width: 150,
+                  }}
+                >
+                  <Picker
+                    selectedValue={page}
+                    onValueChange={(val) => setPage(val)}
+                  >
+                    {Array.from(
+                      { length: Math.ceil(machines.length / pageSize) },
+                      (_, i) => i
+                    ).map((pageIndex) => (
+                      <Picker.Item
+                        key={pageIndex}
+                        label={`Page ${pageIndex + 1}`}
+                        value={pageIndex}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
+            </View>
+          </Pressable>
         ) : (
           <CustomText>No machine data found</CustomText>
         )}
       </DashboardCard>
+
+      {/* 🔹 Stopped Machines Table */}
+      <StoppedMachinesTable data={stoppedMachines} loading={loadingStopped} />
     </DashboardWrapper>
   );
 }

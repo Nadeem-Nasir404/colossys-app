@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#FF6B35", // brand orange header
+    backgroundColor: "#343A40",
   },
   headerText: {
     flex: 1,
