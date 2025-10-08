@@ -4,10 +4,11 @@ import { getUnitWiseMachines } from "@/src/api/UnitWiseMachineApi";
 import CustomText from "@/src/components/CustomText";
 import DashboardCard from "@/src/components/DashboardCard";
 import DashboardWrapper from "@/src/components/DashboardWrapper";
-import KpiUnitWise from "@/src/components/KpiUnitWise"; // ✅ added import
+import KpiUnitWise from "@/src/components/KpiUnitWise";
 import StoppedMachinesTable from "@/src/components/StoppedMachinesTable";
 import UnitMachinePie from "@/src/components/UnitMachinePie";
 import { AuthContext } from "@/src/contexts/AuthContexts";
+import { Picker } from "@react-native-picker/picker";
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -205,6 +206,68 @@ export default function UnitWise() {
                 xAxisLabelTextStyle={{ fontSize: 10 }}
                 yAxisTextStyle={{ fontSize: 10 }}
               />
+
+              {/* 🔹 Pagination Controls */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  marginTop: 20,
+                  alignItems: "center",
+                }}
+              >
+                {/* Machines per page */}
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    width: 150,
+                  }}
+                >
+                  <Picker
+                    selectedValue={pageSize}
+                    onValueChange={(val) => {
+                      setPageSize(val);
+                      setPage(0);
+                    }}
+                  >
+                    {[1, 5, 8, 20, 50, 100].map((size) => (
+                      <Picker.Item
+                        key={size}
+                        label={`${size} per page`}
+                        value={size}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+
+                {/* Page dropdown */}
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#ccc",
+                    borderRadius: 8,
+                    width: 150,
+                  }}
+                >
+                  <Picker
+                    selectedValue={page}
+                    onValueChange={(val) => setPage(val)}
+                  >
+                    {Array.from(
+                      { length: Math.ceil(machines.length / pageSize) },
+                      (_, i) => i
+                    ).map((pageIndex) => (
+                      <Picker.Item
+                        key={pageIndex}
+                        label={`Page ${pageIndex + 1}`}
+                        value={pageIndex}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
 
               {/* Tooltip */}
               {tooltipData && (
