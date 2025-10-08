@@ -14,7 +14,7 @@ export default function MachineData({ machine }: MachineDataProps) {
 
   if (!machine) {
     return (
-      <DashboardCard title="📊 Machine Data">
+      <DashboardCard title="📊 Machines Data">
         <Text>No machine data found</Text>
       </DashboardCard>
     );

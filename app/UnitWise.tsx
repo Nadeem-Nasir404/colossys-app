@@ -1,12 +1,13 @@
-import { getStoppedMachines } from "@/src/api/StoppedMachinesApi"; // 👈 import stopped API
+import { getStoppedMachines } from "@/src/api/StoppedMachinesApi";
 import { getUnitWiseGraph } from "@/src/api/UnitWiseApi";
 import { getUnitWiseMachines } from "@/src/api/UnitWiseMachineApi";
 import CustomText from "@/src/components/CustomText";
 import DashboardCard from "@/src/components/DashboardCard";
 import DashboardWrapper from "@/src/components/DashboardWrapper";
-import StoppedMachinesTable from "@/src/components/StoppedMachinesTable"; // 👈 import stopped table
+import KpiUnitWise from "@/src/components/KpiUnitWise"; // ✅ added import
+import StoppedMachinesTable from "@/src/components/StoppedMachinesTable";
+import UnitMachinePie from "@/src/components/UnitMachinePie";
 import { AuthContext } from "@/src/contexts/AuthContexts";
-import { Picker } from "@react-native-picker/picker";
 import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -29,20 +30,23 @@ export default function UnitWise() {
   const [loading, setLoading] = useState(false);
   const [tooltipData, setTooltipData] = useState<any>(null);
 
-  const [page, setPage] = useState(0); // current page index
-  const [pageSize, setPageSize] = useState(6); // default per-page
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(6);
 
-  // 🔹 stopped machines
   const [stoppedMachines, setStoppedMachines] = useState<any[]>([]);
   const [loadingStopped, setLoadingStopped] = useState(false);
 
-  // 🔹 Load all unit summary
+  // 🔹 Load all units
   useEffect(() => {
     const fetchUnits = async () => {
       try {
         const res = await getUnitWiseGraph(userToken!);
-        setUnits(res);
-        if (res.length > 0) setSelectedUnit(res[0].unit.trim());
+        if (Array.isArray(res) && res.length > 0) {
+          setUnits(res);
+          setSelectedUnit(res[0].unit.trim());
+        } else {
+          setUnits([]);
+        }
       } catch (err) {
         console.error("❌ Error fetching units:", err);
       }
@@ -57,10 +61,10 @@ export default function UnitWise() {
       setLoading(true);
       try {
         const res = await getUnitWiseMachines(userToken!, selectedUnit);
-        setMachines(res);
-        setPage(0); // reset to first page when unit changes
+        setMachines(Array.isArray(res) ? res : []);
+        setPage(0);
       } catch (err) {
-        console.error("❌ Error fetching unit wise machines:", err);
+        console.error("❌ Error fetching machines:", err);
       } finally {
         setLoading(false);
       }
@@ -75,7 +79,7 @@ export default function UnitWise() {
       setLoadingStopped(true);
       try {
         const res = await getStoppedMachines(userToken!, selectedUnit);
-        setStoppedMachines(res);
+        setStoppedMachines(Array.isArray(res) ? res : []);
       } catch (err) {
         console.error("❌ Error fetching stopped machines:", err);
       } finally {
@@ -85,24 +89,23 @@ export default function UnitWise() {
     fetchStopped();
   }, [selectedUnit]);
 
-  // 🔹 Pagination logic
+  // 🔹 Pagination
   const startIndex = page * pageSize;
   const endIndex = startIndex + pageSize;
   const currentMachines = machines.slice(startIndex, endIndex);
 
-  // 🔹 Prepare grouped chart data
-  const chartData: any[] = [];
-  currentMachines.forEach((mch: any) => {
+  // 🔹 Chart Data
+  const chartData: any[] = currentMachines.flatMap((mch: any) => {
     const working = mch.workingEff || 0;
     const product = mch.prdEff || 0;
     const speed = mch.avgSpeed || 0;
 
-    chartData.push(
+    return [
       {
         value: working,
         label: `M${mch.machineNo}`,
         frontColor: "#276FA9",
-        spacing: 6,
+        spacing: 8,
         onPress: (x: number, y: number) =>
           setTooltipData({
             machine: mch.machineNo,
@@ -117,7 +120,7 @@ export default function UnitWise() {
         value: product,
         label: "",
         frontColor: "#754961",
-        spacing: 6,
+        spacing: 8,
         onPress: (x: number, y: number) =>
           setTooltipData({
             machine: mch.machineNo,
@@ -132,7 +135,7 @@ export default function UnitWise() {
         value: speed,
         label: "",
         frontColor: "#FF2F4F",
-        spacing: 18,
+        spacing: 20,
         onPress: (x: number, y: number) =>
           setTooltipData({
             machine: mch.machineNo,
@@ -142,8 +145,8 @@ export default function UnitWise() {
             x,
             y,
           }),
-      }
-    );
+      },
+    ];
   });
 
   return (
@@ -153,13 +156,13 @@ export default function UnitWise() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {units.map((u, idx) => {
             const unitName = u.unit.trim();
+            const isSelected = selectedUnit === unitName;
             return (
               <Pressable
                 key={idx}
                 onPress={() => setSelectedUnit(unitName)}
                 style={{
-                  backgroundColor:
-                    selectedUnit === unitName ? "#FF4A2C" : "#f1f1f1",
+                  backgroundColor: isSelected ? "#FF4A2C" : "#f1f1f1",
                   paddingHorizontal: 14,
                   paddingVertical: 8,
                   borderRadius: 8,
@@ -169,7 +172,7 @@ export default function UnitWise() {
                 <CustomText
                   weight="medium"
                   style={{
-                    color: selectedUnit === unitName ? "#fff" : "#333",
+                    color: isSelected ? "#fff" : "#333",
                     fontSize: 14,
                   }}
                 >
@@ -181,8 +184,8 @@ export default function UnitWise() {
         </ScrollView>
       </DashboardCard>
 
-      {/* 🔹 Chart with pagination */}
-      <DashboardCard title={`📊 Machine Data - ${selectedUnit || ""}`}>
+      {/* 🔹 Chart Section */}
+      <DashboardCard title={`📊 All Machines Data - ${selectedUnit || ""}`}>
         {loading ? (
           <ActivityIndicator size="large" color="#FF4A2C" />
         ) : currentMachines.length > 0 ? (
@@ -198,7 +201,7 @@ export default function UnitWise() {
                 yAxisThickness={1}
                 xAxisThickness={1}
                 isAnimated
-                animationDuration={700}
+                animationDuration={600}
                 xAxisLabelTextStyle={{ fontSize: 10 }}
                 yAxisTextStyle={{ fontSize: 10 }}
               />
@@ -241,109 +244,34 @@ export default function UnitWise() {
                   </Text>
                 </View>
               )}
-
-              {/* Legend */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  marginTop: 20,
-                }}
-              >
-                {[
-                  { color: "#276FA9", label: "Working Eff%" },
-                  { color: "#754961", label: "Product Eff%" },
-                  { color: "#FF2F4F", label: "Avg Speed" },
-                ].map((item, idx) => (
-                  <View
-                    key={idx}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginHorizontal: 10,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 14,
-                        height: 14,
-                        backgroundColor: item.color,
-                        marginRight: 6,
-                        borderRadius: 3,
-                      }}
-                    />
-                    <Text style={{ fontSize: 12 }}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
-
-              {/* Pagination Controls */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-evenly",
-                  marginTop: 20,
-                  alignItems: "center",
-                }}
-              >
-                {/* Machines per page */}
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 8,
-                    width: 150,
-                  }}
-                >
-                  <Picker
-                    selectedValue={pageSize}
-                    onValueChange={(val) => {
-                      setPageSize(val);
-                      setPage(0);
-                    }}
-                  >
-                    {[1, 5, 8, 20, 50, 100].map((size) => (
-                      <Picker.Item
-                        key={size}
-                        label={`${size} per page`}
-                        value={size}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-
-                {/* Page dropdown */}
-                <View
-                  style={{
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 8,
-                    width: 150,
-                  }}
-                >
-                  <Picker
-                    selectedValue={page}
-                    onValueChange={(val) => setPage(val)}
-                  >
-                    {Array.from(
-                      { length: Math.ceil(machines.length / pageSize) },
-                      (_, i) => i
-                    ).map((pageIndex) => (
-                      <Picker.Item
-                        key={pageIndex}
-                        label={`Page ${pageIndex + 1}`}
-                        value={pageIndex}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              </View>
             </View>
           </Pressable>
         ) : (
           <CustomText>No machine data found</CustomText>
         )}
       </DashboardCard>
+
+      {/* 🔹 KPI Section */}
+      {selectedUnit && (
+        <DashboardCard title={`📈 ${selectedUnit} KPI Overview`}>
+          <KpiUnitWise selectedUnit={selectedUnit} token={userToken!} />
+        </DashboardCard>
+      )}
+
+      {/* 🔹 Pie Chart */}
+      {selectedUnit && (
+        <DashboardCard title={`⚙️ ${selectedUnit} Machine Status`}>
+          <UnitMachinePie
+            unitName={selectedUnit}
+            running={
+              units.find((u) => u.unit.trim() === selectedUnit)?.runningMch || 0
+            }
+            stopped={
+              units.find((u) => u.unit.trim() === selectedUnit)?.stoppedMch || 0
+            }
+          />
+        </DashboardCard>
+      )}
 
       {/* 🔹 Stopped Machines Table */}
       <StoppedMachinesTable data={stoppedMachines} loading={loadingStopped} />

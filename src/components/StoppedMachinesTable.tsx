@@ -1,4 +1,3 @@
-// src/components/StoppedMachinesTable.tsx
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import DashboardCard from "./DashboardCard";
@@ -13,35 +12,58 @@ interface StoppedMachine {
 
 interface Props {
   data: StoppedMachine[];
+  unitName?: string; // optional — in case you want to show the unit on top
 }
 
-export default function StoppedMachinesTable({ data }: Props) {
+export default function StoppedMachinesTable({ data, unitName }: Props) {
   if (!data || data.length === 0) {
     return (
-      <DashboardCard title="⛔ Stopped Machines">
+      <DashboardCard
+        title={`⛔ Stopped Machines ${unitName ? `(${unitName})` : ""}`}
+      >
         <Text style={styles.noData}>No stopped machines found</Text>
       </DashboardCard>
     );
   }
 
   return (
-    <DashboardCard title="⛔ Stopped Machines">
+    <DashboardCard
+      title={`⛔ Stopped Machines ${unitName ? `(${unitName})` : ""}`}
+    >
+      {/* Table Header */}
       <View style={styles.tableHeader}>
         <Text style={[styles.cell, styles.header]}>Machine</Text>
         <Text style={[styles.cell, styles.header]}>Status</Text>
         <Text style={[styles.cell, styles.header]}>Reason</Text>
         <Text style={[styles.cell, styles.header]}>Last Update</Text>
       </View>
+
+      {/* Table Body */}
       <FlatList
         data={data}
         keyExtractor={(item) => item.machineNo.toString()}
         renderItem={({ item }) => (
           <View style={styles.tableRow}>
-            <Text style={styles.cell}>{item.machineName}</Text>
-            <Text style={styles.cell}>{item.mchRunStatus}</Text>
-            <Text style={styles.cell}>{item.reason.trim()}</Text>
+            <Text style={styles.cell}>{item.machineName || "-"}</Text>
+            <Text
+              style={[
+                styles.cell,
+                item.mchRunStatus === "Stopped" && {
+                  color: "#FF4A2C",
+                  fontWeight: "600",
+                },
+              ]}
+            >
+              {item.mchRunStatus || "-"}
+            </Text>
+            <Text style={styles.cell}>{item.reason?.trim() || "-"}</Text>
             <Text style={styles.cell}>
-              {new Date(item.maxTime).toLocaleTimeString()}
+              {item.maxTime
+                ? new Date(item.maxTime).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "-"}
             </Text>
           </View>
         )}
@@ -77,5 +99,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#666",
     fontSize: 13,
+    paddingVertical: 10,
   },
 });
