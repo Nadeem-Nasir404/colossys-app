@@ -12,7 +12,7 @@ interface StoppedMachine {
 
 interface Props {
   data: StoppedMachine[];
-  unitName?: string; // optional — in case you want to show the unit on top
+  unitName?: string; // optional — show unit title on card
 }
 
 export default function StoppedMachinesTable({ data, unitName }: Props) {
@@ -26,79 +26,129 @@ export default function StoppedMachinesTable({ data, unitName }: Props) {
     );
   }
 
+  const renderItem = ({
+    item,
+    index,
+  }: {
+    item: StoppedMachine;
+    index: number;
+  }) => (
+    <View
+      style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
+    >
+      <Text style={[styles.cell, styles.machine]}>
+        {item.machineName || "-"}
+      </Text>
+
+      <Text
+        style={[
+          styles.cell,
+          styles.status,
+          item.mchRunStatus === "Stopped"
+            ? styles.statusStopped
+            : styles.statusRunning,
+        ]}
+      >
+        {item.mchRunStatus || "-"}
+      </Text>
+
+      <Text
+        style={[styles.cell, styles.reason]}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {item.reason?.trim() || "-"}
+      </Text>
+
+      <Text style={[styles.cell, styles.time]}>
+        {item.maxTime
+          ? new Date(item.maxTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "-"}
+      </Text>
+    </View>
+  );
+
   return (
     <DashboardCard
       title={`⛔ Stopped Machines ${unitName ? `(${unitName})` : ""}`}
     >
-      {/* Table Header */}
-      <View style={styles.tableHeader}>
-        <Text style={[styles.cell, styles.header]}>Machine</Text>
-        <Text style={[styles.cell, styles.header]}>Status</Text>
-        <Text style={[styles.cell, styles.header]}>Reason</Text>
-        <Text style={[styles.cell, styles.header]}>Last Update</Text>
+      {/* Header */}
+      <View style={[styles.row, styles.header]}>
+        <Text style={styles.headerText}>Machine</Text>
+        <Text style={styles.headerText}>Status</Text>
+        <Text style={styles.headerText}>Reason</Text>
+        <Text style={styles.headerText}>Last Update</Text>
       </View>
 
-      {/* Table Body */}
+      {/* Rows */}
       <FlatList
         data={data}
         keyExtractor={(item) => item.machineNo.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.tableRow}>
-            <Text style={styles.cell}>{item.machineName || "-"}</Text>
-            <Text
-              style={[
-                styles.cell,
-                item.mchRunStatus === "Stopped" && {
-                  color: "#FF4A2C",
-                  fontWeight: "600",
-                },
-              ]}
-            >
-              {item.mchRunStatus || "-"}
-            </Text>
-            <Text style={styles.cell}>{item.reason?.trim() || "-"}</Text>
-            <Text style={styles.cell}>
-              {item.maxTime
-                ? new Date(item.maxTime).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                : "-"}
-            </Text>
-          </View>
-        )}
+        renderItem={renderItem}
       />
     </DashboardCard>
   );
 }
 
 const styles = StyleSheet.create({
-  tableHeader: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    paddingBottom: 6,
-    marginBottom: 6,
+  header: {
+    backgroundColor: "#343A40",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
-  tableRow: {
+  headerText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#fff",
+    textAlign: "center",
+    paddingVertical: 10,
+  },
+  row: {
     flexDirection: "row",
-    paddingVertical: 4,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#eee",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    justifyContent: "space-between",
+  },
+  rowEven: {
+    backgroundColor: "#fdfdfd",
+  },
+  rowOdd: {
+    backgroundColor: "#f7f7f7",
   },
   cell: {
     flex: 1,
-    fontSize: 12,
-    color: "#333",
+    textAlign: "center",
+    fontSize: 12.5,
+    color: "#222",
   },
-  header: {
-    fontWeight: "700",
+  machine: {
+    fontWeight: "600",
+  },
+  status: {
+    fontWeight: "600",
+  },
+  statusStopped: {
     color: "#FF4A2C",
+  },
+  statusRunning: {
+    color: "#0ABF04",
+  },
+  reason: {
+    flex: 1.5,
+  },
+  time: {
+    color: "#555",
+    fontSize: 12,
   },
   noData: {
     textAlign: "center",
     color: "#666",
     fontSize: 13,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
 });

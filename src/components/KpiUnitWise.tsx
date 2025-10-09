@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { getUnitKPIData } from "../api/KpiUnitWise";
 
 interface KpiUnitWiseProps {
@@ -44,70 +50,91 @@ export default function KpiUnitWise({ selectedUnit, token }: KpiUnitWiseProps) {
     );
   }
 
+  // Transform KPI object to array for flatlist-style rendering
+  const data = [
+    { kpi: "🧵 Yarn Count", value: kpiData.yawnCount.toFixed(2) },
+    { kpi: "⚙️ Avg Speed", value: kpiData.avaregeSpeed.toFixed(2) },
+    {
+      kpi: "💪 Working Efficiency",
+      value: `${kpiData.workingEff.toFixed(2)}%`,
+    },
+    {
+      kpi: "🏭 Production Efficiency",
+      value: `${kpiData.productionEff.toFixed(2)}%`,
+    },
+    { kpi: "⏱️ Avg TM", value: kpiData.avgtm.toFixed(2) },
+    { kpi: "📏 Avg TPI", value: kpiData.avgtpi.toFixed(2) },
+  ];
+
+  const renderItem = ({ item, index }: any) => (
+    <View
+      style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
+    >
+      <Text style={styles.cellKey}>{item.kpi}</Text>
+      <Text style={styles.cellValue}>{item.value}</Text>
+    </View>
+  );
+
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>📊 {selectedUnit} KPI Overview</Text>
-
-      <View style={styles.grid}>
-        <View style={styles.row}>
-          <Text style={styles.label}>🧵 Yarn Count:</Text>
-          <Text style={styles.value}>{kpiData.yawnCount.toFixed(2)}</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>⚙️ Avg Speed:</Text>
-          <Text style={styles.value}>{kpiData.avaregeSpeed.toFixed(2)}</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>💪 Working Eff.:</Text>
-          <Text style={styles.value}>{kpiData.workingEff.toFixed(2)}%</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>🏭 Production Eff.:</Text>
-          <Text style={styles.value}>{kpiData.productionEff.toFixed(2)}%</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>⏱️ Avg TM:</Text>
-          <Text style={styles.value}>{kpiData.avgtm.toFixed(2)}</Text>
-        </View>
-
-        <View style={styles.row}>
-          <Text style={styles.label}>📏 Avg TPI:</Text>
-          <Text style={styles.value}>{kpiData.avgtpi.toFixed(2)}</Text>
-        </View>
+    <View style={styles.table}>
+      {/* Header */}
+      <View style={[styles.row, styles.header]}>
+        <Text style={styles.headerText}>📊 KPI</Text>
+        <Text style={styles.headerText}>Value</Text>
       </View>
+
+      {/* Rows */}
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => index.toString()}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   loaderContainer: { alignItems: "center", marginTop: 20 },
-  noData: {
-    alignItems: "center",
-    padding: 20,
-  },
+  noData: { alignItems: "center", padding: 20 },
   noDataText: { fontSize: 16, color: "#888" },
-  card: {
+
+  table: {
+    borderRadius: 10,
+    overflow: "hidden",
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 20,
-    elevation: 4,
+    elevation: 3,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-    color: "#222",
-  },
-  grid: { gap: 8 },
   row: {
     flexDirection: "row",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     justifyContent: "space-between",
+    alignItems: "center",
   },
-  label: { fontSize: 15, color: "#444" },
-  value: { fontSize: 15, fontWeight: "bold", color: "#007bff" },
+  header: {
+    backgroundColor: "#343A40",
+  },
+  headerText: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  rowEven: { backgroundColor: "#fdfdfd" },
+  rowOdd: { backgroundColor: "#f7f7f7" },
+  cellKey: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#222",
+    textAlign: "center",
+  },
+  cellValue: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+    fontWeight: "500",
+  },
 });

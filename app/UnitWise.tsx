@@ -192,20 +192,87 @@ export default function UnitWise() {
         ) : currentMachines.length > 0 ? (
           <Pressable style={{ flex: 1 }} onPress={() => setTooltipData(null)}>
             <View style={{ padding: 10 }}>
-              <BarChart
-                data={chartData}
-                width={width * 0.95}
-                height={250}
-                barWidth={14}
-                barBorderRadius={4}
-                noOfSections={6}
-                yAxisThickness={1}
-                xAxisThickness={1}
-                isAnimated
-                animationDuration={600}
-                xAxisLabelTextStyle={{ fontSize: 10 }}
-                yAxisTextStyle={{ fontSize: 10 }}
-              />
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{
+                  paddingRight: 20,
+                }}
+              >
+                <BarChart
+                  data={chartData}
+                  width={Math.max(width * 0.95, chartData.length * 25)} // ✅ dynamic width
+                  height={250}
+                  barWidth={14}
+                  barBorderRadius={4}
+                  noOfSections={6}
+                  yAxisThickness={1}
+                  xAxisThickness={1}
+                  isAnimated
+                  animationDuration={600}
+                  xAxisLabelTextStyle={{ fontSize: 10 }}
+                  yAxisTextStyle={{ fontSize: 10 }}
+                />
+              </ScrollView>
+
+              {/* 🔹 Legend */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  marginTop: 10,
+                  flexWrap: "wrap",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "#276FA9",
+                      marginRight: 4,
+                      borderRadius: 2,
+                    }}
+                  />
+                  <Text style={{ fontSize: 12 }}>Working Eff%</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "#754961",
+                      marginRight: 4,
+                      borderRadius: 2,
+                    }}
+                  />
+                  <Text style={{ fontSize: 12 }}>Product Eff%</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "#FF2F4F",
+                      marginRight: 4,
+                      borderRadius: 2,
+                    }}
+                  />
+                  <Text style={{ fontSize: 12 }}>Avg Speed</Text>
+                </View>
+              </View>
 
               {/* 🔹 Pagination Controls */}
               <View

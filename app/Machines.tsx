@@ -6,6 +6,7 @@ import { getUnitWiseGraph } from "@/src/api/UnitWiseApi";
 import { getUnitWiseMachines } from "@/src/api/UnitWiseMachineApi";
 import DashboardCard from "@/src/components/DashboardCard";
 import DashboardWrapper from "@/src/components/DashboardWrapper";
+import KpiUnitWise from "@/src/components/KpiUnitWise"; // ✅ Import your existing component
 import MachineData from "@/src/components/MachineData";
 import { AuthContext } from "@/src/contexts/AuthContexts";
 
@@ -18,7 +19,7 @@ export default function Machines() {
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Fetch units
+  // 🔹 Fetch Units
   useEffect(() => {
     const fetchUnits = async () => {
       try {
@@ -32,7 +33,7 @@ export default function Machines() {
     fetchUnits();
   }, [userToken]);
 
-  // Fetch machines when unit changes
+  // 🔹 Fetch Machines when Unit changes
   useEffect(() => {
     if (!selectedUnit) return;
     const fetchMachines = async () => {
@@ -40,7 +41,13 @@ export default function Machines() {
       try {
         const res = await getUnitWiseMachines(userToken!, selectedUnit);
         setMachines(res);
-        setSelectedMachine(null);
+
+        // ✅ Automatically select first machine
+        if (res.length > 0) {
+          setSelectedMachine(res[0].machineNo.toString());
+        } else {
+          setSelectedMachine(null);
+        }
       } catch (err) {
         console.error("❌ Error fetching machines:", err);
       } finally {
@@ -56,7 +63,7 @@ export default function Machines() {
 
   return (
     <DashboardWrapper>
-      {/* Unit Dropdown */}
+      {/* 🔹 Unit Dropdown */}
       <DashboardCard title="🏭 Select Unit">
         <Picker
           selectedValue={selectedUnit}
@@ -68,14 +75,13 @@ export default function Machines() {
         </Picker>
       </DashboardCard>
 
-      {/* Machine Dropdown */}
+      {/* 🔹 Machine Dropdown */}
       {machines.length > 0 && (
         <DashboardCard title="🛠 Select Machine">
           <Picker
             selectedValue={selectedMachine}
             onValueChange={(val) => setSelectedMachine(val)}
           >
-            <Picker.Item label="-- Select Machine --" value={null} />
             {machines.map((m, idx) => (
               <Picker.Item
                 key={idx}
@@ -87,13 +93,18 @@ export default function Machines() {
         </DashboardCard>
       )}
 
-      {/* Chart */}
+      {/* 🔹 Machine Data Chart */}
       {loading ? (
         <DashboardCard>
           <ActivityIndicator size="large" color="#FF4A2C" />
         </DashboardCard>
       ) : (
         <MachineData machine={selectedData} />
+      )}
+
+      {/* 🔹 KPI Overview for Selected Unit */}
+      {selectedUnit && userToken && (
+        <KpiUnitWise selectedUnit={selectedUnit} token={userToken} />
       )}
     </DashboardWrapper>
   );

@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   centerBox: { alignItems: "center", justifyContent: "center" },
   centerNumber: { fontSize: 20, fontWeight: "bold", color: "#333" },
   centerLabel: { fontSize: 14, color: "#666" },
-  legend: { marginTop: 20 },
+  legend: { marginTop: 10 },
   legendRow: { flexDirection: "row", alignItems: "center", marginVertical: 5 },
   dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
   legendText: { fontSize: 15, color: "#444", fontWeight: "500" },
