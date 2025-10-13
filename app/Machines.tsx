@@ -4,8 +4,10 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  Modal,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -28,8 +30,13 @@ export default function Machines() {
   const [selectedMachine, setSelectedMachine] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [tooltip, setTooltip] = useState<{
+    day: string;
+    work: number;
+    prod: number;
+  } | null>(null);
 
-  const screenWidth = Dimensions.get("window").width - 40;
+  const screenWidth = Dimensions.get("window").width - 60;
 
   // 🔹 Fetch Units
   useEffect(() => {
@@ -81,7 +88,7 @@ export default function Machines() {
     (m) => m.machineNo.toString() === selectedMachine
   );
 
-  // 🔹 Prepare chart data
+  // 🔹 Prepare API chart data
   const filteredData = chartData.filter(
     (i) => i.machineNo?.toString() === selectedMachine
   );
@@ -95,6 +102,41 @@ export default function Machines() {
     value: i.prdEff,
     label: `Day ${idx + 1}`,
   }));
+
+  // 🔹 Static Chart Data (for 14-Day Performance)
+  const staticWorkingEff = [
+    { value: 16, label: "Day 1" },
+    { value: 18.2, label: "Day 2" },
+    { value: 23.1, label: "Day 3" },
+    { value: 27.9, label: "Day 4" },
+    { value: 32.2, label: "Day 5" },
+    { value: 36.4, label: "Day 6" },
+    { value: 39.8, label: "Day 7" },
+    { value: 38.4, label: "Day 8" },
+    { value: 35.5, label: "Day 9" },
+    { value: 29.2, label: "Day 10" },
+    { value: 22, label: "Day 11" },
+    { value: 17.8, label: "Day 12" },
+    { value: 15.6, label: "Day 13" },
+    { value: 12.4, label: "Day 14" },
+  ];
+
+  const staticProductionEff = [
+    { value: -2.9, label: "Day 1" },
+    { value: -3.6, label: "Day 2" },
+    { value: -0.6, label: "Day 3" },
+    { value: 4.8, label: "Day 4" },
+    { value: 10.2, label: "Day 5" },
+    { value: 14.5, label: "Day 6" },
+    { value: 15.6, label: "Day 7" },
+    { value: 16.5, label: "Day 8" },
+    { value: 12, label: "Day 9" },
+    { value: 6.5, label: "Day 10" },
+    { value: 2, label: "Day 11" },
+    { value: -0.9, label: "Day 12" },
+    { value: -3.5, label: "Day 13" },
+    { value: -5.2, label: "Day 14" },
+  ];
 
   return (
     <DashboardWrapper>
@@ -143,98 +185,136 @@ export default function Machines() {
           <KpiUnitWise selectedUnit={selectedUnit} token={userToken} />
         )}
 
-        {/* 🔹 7-Day Efficiency Chart */}
-        {workingEffData.length > 0 && (
-          <DashboardCard title="📊 Machine 7-Day Efficiency">
-            <View
+        {/* 🔹 Static 14-Day Performance Chart */}
+        <DashboardCard title="📈 14 Days Performance Overview">
+          <View
+            style={{
+              backgroundColor: "#f8fafc",
+              borderRadius: 16,
+              paddingVertical: 20,
+              alignItems: "center",
+            }}
+          >
+            <Text
               style={{
-                backgroundColor: "#f9fafb",
-                borderRadius: 12,
-                paddingVertical: 20,
-                alignItems: "center",
-                shadowColor: "#000",
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 4,
+                fontSize: 17,
+                fontWeight: "700",
+                color: "#1e293b",
+                marginBottom: 10,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  color: "#333",
-                  marginBottom: 10,
-                }}
-              >
-                Performance Overview
+              Machine {selectedMachine || ""} - 14 Days Trend
+            </Text>
+
+            <LineChart
+              data={staticWorkingEff}
+              data2={staticProductionEff}
+              curved
+              areaChart
+              animateOnDataChange
+              animationDuration={900}
+              showVerticalLines
+              color1="#94a3b8"
+              color2="#ef4444"
+              startFillColor="rgba(148,163,184,0.25)"
+              endFillColor="rgba(148,163,184,0.05)"
+              startFillColor2="rgba(239,68,68,0.3)"
+              endFillColor2="rgba(239,68,68,0.05)"
+              height={270}
+              width={screenWidth}
+              initialSpacing={25}
+              spacing={40}
+              dataPointsColor1="#94a3b8"
+              dataPointsColor2="#ef4444"
+              dataPointsHeight={8}
+              dataPointsWidth={8}
+              hideDataPoints={false}
+              onDataPointClick={(item, index) => {
+                setTooltip({
+                  day: staticWorkingEff[index].label,
+                  work: staticWorkingEff[index].value,
+                  prod: staticProductionEff[index].value,
+                });
+              }}
+              xAxisColor="#e5e7eb"
+              yAxisColor="#e5e7eb"
+              showLegend
+              legendText1="Working Efficiency"
+              legendColor1="#94a3b8"
+              legendText2="Production Efficiency"
+              legendColor2="#ef4444"
+              legendTextSize={13}
+              yAxisLabelSuffix="%"
+              rulesColor="#e2e8f0"
+              noOfSections={6}
+            />
+
+            <Text
+              style={{
+                marginTop: 12,
+                color: "#64748b",
+                fontSize: 12,
+              }}
+            >
+              📊 Tap any point to see efficiency details
+            </Text>
+          </View>
+        </DashboardCard>
+
+        {/* 🔹 Tooltip Modal */}
+        <Modal transparent visible={!!tooltip} animationType="fade">
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#fff",
+                padding: 20,
+                borderRadius: 10,
+                width: "75%",
+                shadowColor: "#000",
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 6,
+              }}
+            >
+              <Text style={{ fontSize: 16, fontWeight: "700", color: "#222" }}>
+                {tooltip?.day} Performance
+              </Text>
+              <Text style={{ marginTop: 8, color: "#475569" }}>
+                🔹 Working Efficiency: {tooltip?.work}%
+              </Text>
+              <Text style={{ marginTop: 4, color: "#ef4444" }}>
+                🔸 Production Efficiency: {tooltip?.prod}%
               </Text>
 
-              <LineChart
-                data={workingEffData}
-                data2={productionEffData}
-                curved
-                areaChart
-                animateOnDataChange
-                animationDuration={1200}
-                showVerticalLines
-                color1="#007bff"
-                color2="#ff4d4d"
-                startFillColor="rgba(0,123,255,0.35)"
-                endFillColor="rgba(0,123,255,0.05)"
-                startFillColor2="rgba(255,77,77,0.35)"
-                endFillColor2="rgba(255,77,77,0.05)"
-                height={280}
-                width={screenWidth}
-                initialSpacing={20}
-                spacing={45}
-                dataPointsColor1="#007bff"
-                dataPointsColor2="#ff4d4d"
-                dataPointsHeight={8}
-                dataPointsWidth={8}
-                hideDataPoints={false}
-                showTextOnPress
-                textShiftY={-15}
-                textBackgroundColor="rgba(0,0,0,0.75)"
-                textColor="#fff"
-                textFontSize={11}
-                textPadding={6}
-                xAxisColor="#ccc"
-                yAxisColor="#ccc"
-                xAxisLabelTextStyle={{
-                  fontSize: 11,
-                  color: "#444",
-                  fontWeight: "500",
-                }}
-                yAxisTextStyle={{
-                  color: "#444",
-                  fontSize: 11,
-                  fontWeight: "500",
-                }}
-                showLegend
-                legendText1="Working Efficiency"
-                legendColor1="#007bff"
-                legendText2="Production Efficiency"
-                legendColor2="#ff4d4d"
-                legendTextSize={13}
-                yAxisLabelSuffix="%"
-                rulesColor="#e5e7eb"
-                rulesType="solid"
-                noOfSections={6}
-                backgroundColor="transparent"
-              />
-
-              <Text
+              <TouchableOpacity
+                onPress={() => setTooltip(null)}
                 style={{
-                  marginTop: 12,
-                  color: "#666",
-                  fontSize: 12,
+                  marginTop: 15,
+                  backgroundColor: "#007bff",
+                  paddingVertical: 8,
+                  borderRadius: 8,
                 }}
               >
-                Tap any point to see exact efficiency %
-              </Text>
+                <Text
+                  style={{
+                    color: "#fff",
+                    textAlign: "center",
+                    fontWeight: "600",
+                  }}
+                >
+                  Close
+                </Text>
+              </TouchableOpacity>
             </View>
-          </DashboardCard>
-        )}
+          </View>
+        </Modal>
       </ScrollView>
     </DashboardWrapper>
   );
