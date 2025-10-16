@@ -52,18 +52,18 @@ export default function KpiUnitWise({ selectedUnit, token }: KpiUnitWiseProps) {
 
   // Transform KPI object to array for flatlist-style rendering
   const data = [
-    { kpi: "🧵 Yarn Count", value: kpiData.yawnCount.toFixed(2) },
-    { kpi: "⚙️ Avg Speed", value: kpiData.avaregeSpeed.toFixed(2) },
+    { kpi: " Yarn Count", value: kpiData.yawnCount.toFixed(2) },
+    { kpi: " Avg Speed", value: kpiData.avaregeSpeed.toFixed(2) },
     {
-      kpi: "💪 Working Efficiency",
+      kpi: " Working Efficiency",
       value: `${kpiData.workingEff.toFixed(2)}%`,
     },
     {
-      kpi: "🏭 Production Efficiency",
+      kpi: " Production Efficiency",
       value: `${kpiData.productionEff.toFixed(2)}%`,
     },
-    { kpi: "⏱️ Avg TM", value: kpiData.avgtm.toFixed(2) },
-    { kpi: "📏 Avg TPI", value: kpiData.avgtpi.toFixed(2) },
+    { kpi: " Avg TM", value: kpiData.avgtm.toFixed(2) },
+    { kpi: " Avg TPI", value: kpiData.avgtpi.toFixed(2) },
   ];
 
   const renderItem = ({ item, index }: any) => (

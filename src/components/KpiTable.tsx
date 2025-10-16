@@ -7,7 +7,47 @@ interface KpiTableProps {
 }
 
 const KpiTable: React.FC<KpiTableProps> = ({ data }) => {
-  const renderItem = ({ item, index }: { item: KpiItem; index: number }) => (
+  // ✅ Map your KPI keys to readable labels
+  const labelMap: Record<string, string> = {
+    yawnCount: "Yarn Count",
+    avaregeSpeed: "Avg Speed",
+    workingEff: "Working Efficiency",
+    productionEff: "Production Efficiency",
+    avgtm: "Avg TM",
+    avgtpi: "Avg TPI",
+  };
+
+  // ✅ Clean and transform data from API
+  const tableData = (Array.isArray(data) ? data : Object.entries(data || {}))
+    .map((item: any, index: number) => {
+      let key: string, value: any;
+
+      if (Array.isArray(item)) {
+        key = item[0];
+        value = item[1];
+      } else {
+        key = item.kpi || `KPI-${index}`;
+        value = item.value;
+      }
+
+      // Skip null or undefined values
+      if (value === null || value === undefined || value === "") return null;
+
+      // Fix "[object Object]" issue
+      const cleanValue =
+        typeof value === "object"
+          ? JSON.stringify(value)
+          : typeof value === "number"
+          ? value.toFixed(2)
+          : String(value ?? "N/A");
+
+      const label = labelMap[key] || key;
+
+      return { key, kpi: label, value: cleanValue };
+    })
+    .filter(Boolean); // ✅ Remove null entries
+
+  const renderItem = ({ item, index }: any) => (
     <View
       style={[styles.row, index % 2 === 0 ? styles.rowEven : styles.rowOdd]}
     >
@@ -26,9 +66,10 @@ const KpiTable: React.FC<KpiTableProps> = ({ data }) => {
 
       {/* Rows */}
       <FlatList
-        data={data}
+        data={tableData}
         renderItem={renderItem}
-        keyExtractor={(_, index) => index.toString()}
+        keyExtractor={(item) => item.key}
+        scrollEnabled={false}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No KPI data available</Text>
         }
@@ -39,18 +80,20 @@ const KpiTable: React.FC<KpiTableProps> = ({ data }) => {
 
 const styles = StyleSheet.create({
   table: {
-    borderRadius: 8,
+    borderRadius: 10,
     overflow: "hidden",
+    backgroundColor: "#fff",
+    elevation: 3,
   },
   row: {
     flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     justifyContent: "space-between",
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#343A40", // brand orange for header
+    backgroundColor: "#343A40",
   },
   headerText: {
     flex: 1,
@@ -59,7 +102,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
   },
-  rowEven: { backgroundColor: "#fdfdfd" }, // softer to blend with card bg
+  rowEven: { backgroundColor: "#fdfdfd" },
   rowOdd: { backgroundColor: "#f7f7f7" },
   cellKey: {
     flex: 1,

@@ -174,7 +174,7 @@ export default function Machines() {
         {/* 🔹 Machine Data */}
         {loading ? (
           <DashboardCard>
-            <ActivityIndicator size="large" color="#FF4A2C" />
+            <ActivityIndicator size="large" color="#000000ff" />
           </DashboardCard>
         ) : (
           <MachineData machine={selectedData} />

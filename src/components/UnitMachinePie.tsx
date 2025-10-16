@@ -55,13 +55,13 @@ export default function UnitMachinePie({ unitName }: Props) {
   const chartData = [
     {
       value: running,
-      color: activeIndex === 0 ? "#11574F" : "#107a57ff",
+      color: activeIndex === 0 ? "#11574f" : "#11574f",
       focused: activeIndex === 0,
       onPress: () => setActiveIndex(0),
     },
     {
       value: stopped,
-      color: activeIndex === 1 ? "#000000" : "#891616ff",
+      color: activeIndex === 1 ? "#000000" : "#000000",
       focused: activeIndex === 1,
       onPress: () => setActiveIndex(1),
     },

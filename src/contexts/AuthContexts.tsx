@@ -23,6 +23,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userToken, setUserToken] = useState<string | null>(null);
   const [user, setUser] = useState<any | null>(null);
 
+  const REST_BASE = "http://192.168.1.101:801/api"; // ✅ Base API
+
   const restoreSession = useCallback(async () => {
     const token = await storage.getToken();
     console.log("🔑 Restored token:", token);
@@ -30,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (token) {
       setUserToken(token);
     } else {
-      setUserToken(null); // ⚡ Fix: Ensure null if no token
+      setUserToken(null);
     }
   }, []);
 
@@ -41,10 +43,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(async () => {
-    await storage.removeToken();
-    setUserToken(null);
-    setUser(null);
-  }, []);
+    try {
+      if (userToken) {
+        console.log("📤 Logging out from server...");
+        await fetch(`${REST_BASE}/account/logout`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+      }
+    } catch (err) {
+      console.warn("⚠️ Server logout failed:", err);
+    } finally {
+      // Always clear local session
+      await storage.removeToken();
+      setUserToken(null);
+      setUser(null);
+      console.log("✅ Logged out locally");
+    }
+  }, [userToken]);
 
   return (
     <AuthContext.Provider

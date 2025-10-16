@@ -1,8 +1,15 @@
+import CustomText from "@/src/components/CustomText";
 import { AuthContext, AuthProvider } from "@/src/contexts/AuthContexts";
+import {
+  Poppins_400Regular,
+  Poppins_500Medium,
+  Poppins_700Bold,
+  useFonts,
+} from "@expo-google-fonts/poppins";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { LinearGradient } from "expo-linear-gradient";
-import { Redirect, Slot, usePathname } from "expo-router";
+import { Redirect, Slot, usePathname, useRouter } from "expo-router";
 import { Drawer } from "expo-router/drawer";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -14,18 +21,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-// ✅ Fonts
-import {
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_700Bold,
-  useFonts,
-} from "@expo-google-fonts/poppins";
-
-// ✅ Our CustomText wrapper
-import CustomText from "@/src/components/CustomText";
-
-// 🔹 Patch RNText globally to always use CustomText
+// 🔹 Patch RNText globally
 (RNText as any).render = (props: any, ref: any) => {
   return <CustomText {...props} ref={ref} />;
 };
@@ -33,9 +29,15 @@ import CustomText from "@/src/components/CustomText";
 // ---------------- Drawer Content ----------------
 function CustomDrawerContent(props: any) {
   const { logout, user } = useContext(AuthContext);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/login"); // ✅ Navigate to login page after logout
+  };
 
   return (
-    <LinearGradient colors={["#ffffff", "#fff5f2"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#000000ff", "#343A40"]} style={{ flex: 1 }}>
       <DrawerContentScrollView
         {...props}
         contentContainerStyle={{ flex: 1, paddingTop: 0 }}
@@ -75,7 +77,7 @@ function CustomDrawerContent(props: any) {
                     weight="medium"
                     style={[
                       styles.drawerLabel,
-                      { color: focused ? "#fff" : "#333" },
+                      { color: focused ? "#fff" : "#fff" },
                     ]}
                   >
                     {route.name === "index" ? "Dashboard" : route.name}
@@ -96,8 +98,8 @@ function CustomDrawerContent(props: any) {
           })}
         </View>
 
-        {/* Logout */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+        {/* ✅ Logout */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={22} color="red" />
           <CustomText weight="medium" style={styles.logoutText}>
             Logout
@@ -170,7 +172,7 @@ function AuthGuard() {
           title: "Unit Wise",
           headerBackground: () => (
             <LinearGradient
-              colors={["#FF6A3D", "#a03826ff"]}
+              colors={["#343A40", "#000000ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}
@@ -184,7 +186,7 @@ function AuthGuard() {
           title: "Machines",
           headerBackground: () => (
             <LinearGradient
-              colors={["#FF6A3D", "#a03826ff"]}
+              colors={["#343A40", "#000000ff"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={{ flex: 1 }}
@@ -245,7 +247,7 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
     marginBottom: 25,
   },
-  userName: { fontSize: 14 },
+  userName: { fontSize: 14, color: "#fff" },
   drawerItem: {
     borderRadius: 12,
     marginVertical: 5,

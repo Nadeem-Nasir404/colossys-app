@@ -31,13 +31,13 @@ export default function UnitMachineChart({ data }: { data: UnitData[] }) {
       },
       {
         value: unit.stoppedMch,
-        color: "#F44336", // Stopped (Red)
+        color: "#F2AF58", // Stopped (Red)
         onPress: (x: number, y: number) =>
           setTooltipData({
             label: unit.unit,
             metric: "Stopped",
             value: unit.stoppedMch,
-            color: "#F44336",
+            color: "#00000",
             x,
             y,
           }),
@@ -132,7 +132,7 @@ export default function UnitMachineChart({ data }: { data: UnitData[] }) {
               style={{
                 width: 14,
                 height: 14,
-                backgroundColor: "#F44336",
+                backgroundColor: "#F2AF58",
                 marginRight: 6,
                 borderRadius: 3,
               }}
