@@ -1,6 +1,6 @@
 import React from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
-import CustomText from "../components/CustomText"; // ⬅️ adjust path if needed
+import { FlatList, StyleSheet, View } from "react-native";
+import CustomText from "../components/CustomText";
 
 interface WrapperProps {
   title?: string;
@@ -8,31 +8,40 @@ interface WrapperProps {
 }
 
 export default function DashboardWrapper({ title, children }: WrapperProps) {
-  return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+  // create one renderable item to safely enable scrolling
+  const renderContent = () => (
+    <View style={styles.content}>
       {title && <CustomText style={styles.title}>{title}</CustomText>}
-      <View style={styles.content}>{children}</View>
-    </ScrollView>
+      {children}
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={[1]} // dummy single item for safe scrolling
+      renderItem={renderContent}
+      keyExtractor={() => "dashboard-wrapper"}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF", // clean light mode
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingTop: 12,
+    paddingBottom: 30,
   },
   title: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#FF4A2C", // brand orange for titles
+    color: "#FF4A2C",
     marginBottom: 18,
-    fontFamily: "Poppins_600SemiBold", // ✅ ensures Poppins
+    fontFamily: "Poppins_600SemiBold",
   },
   content: {
-    flex: 1,
     gap: 18,
-    paddingBottom: 30, // safe bottom space
   },
 });

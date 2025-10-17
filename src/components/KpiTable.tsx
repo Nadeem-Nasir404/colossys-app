@@ -43,7 +43,13 @@ const KpiTable: React.FC<KpiTableProps> = ({ data }) => {
 
       const label = labelMap[key] || key;
 
-      return { key, kpi: label, value: cleanValue };
+      // ✅ Add % sign for efficiency values
+      const finalValue =
+        key === "workingEff" || key === "productionEff"
+          ? `${cleanValue}%`
+          : cleanValue;
+
+      return { key, kpi: label, value: finalValue };
     })
     .filter(Boolean); // ✅ Remove null entries
 

@@ -15,11 +15,16 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Text as RNText,
+  StatusBar,
   StyleSheet,
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 // 🔹 Patch RNText globally
 (RNText as any).render = (props: any, ref: any) => {
@@ -30,26 +35,30 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 function CustomDrawerContent(props: any) {
   const { logout, user } = useContext(AuthContext);
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const handleLogout = async () => {
     await logout();
-    router.replace("/login"); // ✅ Navigate to login page after logout
+    setTimeout(() => {
+      router.push("/login");
+    }, 100);
   };
 
   return (
-    <LinearGradient colors={["#000000ff", "#343A40"]} style={{ flex: 1 }}>
+    <LinearGradient colors={["#000000", "#343A40"]} style={{ flex: 1 }}>
       <DrawerContentScrollView
         {...props}
-        contentContainerStyle={{ flex: 1, paddingTop: 0 }}
+        contentContainerStyle={{
+          flex: 1,
+          paddingTop: insets.top, // ✅ Safe spacing top (no overlap)
+        }}
       >
-        {/* Title */}
         <View style={styles.headerBox}>
           <CustomText weight="bold" style={styles.logoText}>
             COLOSSYS
           </CustomText>
         </View>
 
-        {/* User */}
         <View style={styles.userBox}>
           <Ionicons name="person-circle-outline" size={40} color="#FF4A2C" />
           <View style={{ marginLeft: 10 }}>
@@ -59,46 +68,51 @@ function CustomDrawerContent(props: any) {
           </View>
         </View>
 
-        {/* Drawer Items */}
         <View style={{ flex: 1, paddingHorizontal: 10 }}>
-          {props.state.routes.map((route: any, index: number) => {
-            const focused = props.state.index === index;
-            const iconMap: any = {
-              index: "home-outline",
-              UnitWise: "analytics-outline",
-              Machines: "cog-outline",
-            };
+          {props.state.routes
+            .filter(
+              (route: any) => !["login", "select-system"].includes(route.name)
+            )
+            .map((route: any, index: number) => {
+              const focused = props.state.index === index;
+              const iconMap: any = {
+                index: "home-outline",
+                UnitWise: "analytics-outline",
+                Machines: "cog-outline",
+              };
 
-            return (
-              <DrawerItem
-                key={route.key}
-                label={({ color }) => (
-                  <CustomText
-                    weight="medium"
-                    style={[
-                      styles.drawerLabel,
-                      { color: focused ? "#fff" : "#fff" },
-                    ]}
-                  >
-                    {route.name === "index" ? "Dashboard" : route.name}
-                  </CustomText>
-                )}
-                icon={({ size }) => (
-                  <Ionicons
-                    name={iconMap[route.name]}
-                    size={size}
-                    color={focused ? "#fff" : "#FF4A2C"}
-                  />
-                )}
-                onPress={() => props.navigation.navigate(route.name)}
-                style={[styles.drawerItem, focused && styles.drawerItemActive]}
-                labelStyle={{ marginLeft: -15 }}
-              />
-            );
-          })}
+              return (
+                <DrawerItem
+                  key={route.key}
+                  label={({ color }) => (
+                    <CustomText
+                      weight="medium"
+                      style={[
+                        styles.drawerLabel,
+                        { color: focused ? "#fff" : "#fff" },
+                      ]}
+                    >
+                      {route.name === "index" ? "Dashboard" : route.name}
+                    </CustomText>
+                  )}
+                  icon={({ size }) => (
+                    <Ionicons
+                      name={iconMap[route.name]}
+                      size={size}
+                      color={focused ? "#fff" : "#FF4A2C"}
+                    />
+                  )}
+                  onPress={() => props.navigation.navigate(route.name)}
+                  style={[
+                    styles.drawerItem,
+                    focused && styles.drawerItemActive,
+                  ]}
+                  labelStyle={{ marginLeft: -15 }}
+                />
+              );
+            })}
         </View>
 
-        {/* ✅ Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Ionicons name="log-out-outline" size={22} color="red" />
           <CustomText weight="medium" style={styles.logoutText}>
@@ -137,64 +151,71 @@ function AuthGuard() {
     return <Slot />;
   }
 
-  if (userToken && pathname === "/login") return <Redirect href="/" />;
+  if (userToken && pathname === "/login")
+    return <Redirect href="/select-system" />;
 
   return (
-    <Drawer
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{
-        headerTintColor: "#fff",
-        drawerStyle: { backgroundColor: "transparent", width: 315 },
-        headerTitleStyle: {
-          fontFamily: "Poppins_700Bold",
-          fontSize: 18,
-          color: "#fff",
-        },
-      }}
-    >
-      <Drawer.Screen
-        name="index"
-        options={{
-          title: "Dashboard",
-          headerBackground: () => (
-            <LinearGradient
-              colors={["#343A40", "#000000ff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ flex: 1 }}
-            />
-          ),
+    <>
+      <StatusBar backgroundColor="#000" barStyle="light-content" />
+      <Drawer
+        drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={{
+          headerTintColor: "#fff",
+          headerShown: true,
+          headerTransparent: false, // ✅ show header properly
+          headerStyle: { backgroundColor: "#000" }, // ✅ no white background
+          drawerStyle: { backgroundColor: "transparent", width: 315 },
+          headerTitleStyle: {
+            fontFamily: "Poppins_700Bold",
+            fontSize: 18,
+            color: "#fff",
+          },
         }}
-      />
-      <Drawer.Screen
-        name="UnitWise"
-        options={{
-          title: "Unit Wise",
-          headerBackground: () => (
-            <LinearGradient
-              colors={["#343A40", "#000000ff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ flex: 1 }}
-            />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="Machines"
-        options={{
-          title: "Machines",
-          headerBackground: () => (
-            <LinearGradient
-              colors={["#343A40", "#000000ff"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{ flex: 1 }}
-            />
-          ),
-        }}
-      />
-    </Drawer>
+      >
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: "Dashboard",
+            headerBackground: () => (
+              <LinearGradient
+                colors={["#343A40", "#000000"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="UnitWise"
+          options={{
+            title: "Unit Wise",
+            headerBackground: () => (
+              <LinearGradient
+                colors={["#343A40", "#000000"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
+              />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="Machines"
+          options={{
+            title: "Machines",
+            headerBackground: () => (
+              <LinearGradient
+                colors={["#343A40", "#000000"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{ flex: 1 }}
+              />
+            ),
+          }}
+        />
+      </Drawer>
+    </>
   );
 }
 
@@ -227,16 +248,15 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   headerBox: {
-    paddingVertical: 25,
+    paddingVertical: 20,
     alignItems: "center",
     borderBottomWidth: 1,
     borderColor: "#e0e0e0",
   },
   logoText: {
-    fontSize: 39,
+    fontSize: 36,
     color: "#FF4A2C",
     letterSpacing: 1,
-    marginTop: 35,
   },
   userBox: {
     flexDirection: "row",
